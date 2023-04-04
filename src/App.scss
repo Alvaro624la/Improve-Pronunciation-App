@@ -1,0 +1,102 @@
+body{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.app{
+    &__textsAB-cont{
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        color: #000;
+        padding: 2em;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+
+        &__textA-cont{
+            display: flex;
+            flex-direction: column;
+
+            &__title{
+                font-size: 2em;
+            }
+            &__readingText{
+                font-family: Helvetica, Arial, sans-serif;
+                width: 100%;
+                height: 150px;
+                resize: none;
+                font-size: 1.2em;
+            }
+            &__api-listen-btns-cont{
+                    
+                &__btn{
+                    font-size: 2em;
+                    cursor: pointer;
+                    padding: 0.25em;
+
+                    &:hover{
+                        background-color: rgba(0, 0, 0, 0.2);
+                        border-radius: 50%;
+                    }
+                    &:active{
+                        background-color: rgba(0, 0, 0, 0.4);
+                    }
+                }
+            }
+        }
+        &__textB-cont{            
+            &__transcript{
+                font-family: Helvetica, Arial, sans-serif;
+                width: 100%;
+                height: 150px;
+                resize: none;
+                font-size: 1.2em;
+            }
+        }
+    }
+    &__btns-cont{
+        display: flex;
+        flex-direction: column;
+
+        button{
+            height: 50px;
+            cursor: pointer;
+            background: none;
+            border-radius: 10px;
+            border: 1px solid black;
+            margin: 0.5em 0;
+            font-size: 1em;
+
+            &:hover{
+                background-color: rgba(0, 0, 0, 0.2);
+            }
+            &:active{
+                background-color: rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        &__btn-change{
+            font-weight: 600;
+        }
+        &__rec-stop{
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+
+            &__btn-rec{
+                &:active, &:hover{
+                    color: #f00;
+                }
+            }
+            &__btn-stop{
+                &:active{
+                    color: #f00;
+                }
+            }
+        }
+        &__btn-check{
+            &:active{
+                color: #080;
+            }
+        }
+    }
+}
