@@ -17,7 +17,7 @@ body{
             flex-direction: column;
 
             &__title{
-                font-size: 2em;
+                font-size: 1em;
             }
             &__readingText{
                 font-family: Helvetica, Arial, sans-serif;
@@ -25,9 +25,9 @@ body{
                 height: 150px;
                 resize: none;
                 font-size: 1.2em;
+                padding: 0.25em;
             }
             &__api-listen-btns-cont{
-                    
                 &__btn{
                     font-size: 2em;
                     cursor: pointer;
@@ -50,52 +50,71 @@ body{
                 height: 150px;
                 resize: none;
                 font-size: 1.2em;
+                padding: 0.25em;
             }
         }
     }
     &__btns-cont{
+        position: relative;
         display: flex;
         flex-direction: column;
-
+        padding: 20px 2em;
+        
         button{
             height: 50px;
             cursor: pointer;
             background: none;
             border-radius: 10px;
             border: 1px solid black;
-            margin: 0.5em 0;
+            margin: 0.35em 0;
             font-size: 1em;
 
             &:hover{
-                background-color: rgba(0, 0, 0, 0.2);
+                background-color: rgba(0, 0, 0, 0.3) !important;
             }
             &:active{
-                background-color: rgba(0, 0, 0, 0.4);
+                background-color: rgba(0, 0, 0, 0.4) !important;
             }
         }
 
         &__btn-change{
             font-weight: 600;
+            background-color: rgba(0, 0, 0, 0.1) !important;
         }
         &__rec-stop{
             display: flex;
             flex-direction: row;
-            justify-content: center;
+            justify-content: space-around;
 
             &__btn-rec{
-                &:active, &:hover{
-                    color: #f00;
+                padding: 0 2em;
+                background-color: #f00e !important;
+
+                &:active{
+                    background-color: #f00a !important;
                 }
             }
             &__btn-stop{
+                padding: 0 2em;
+                background-color: #a0a0a0ee !important;
+                color: #000;
+
                 &:active{
-                    color: #f00;
+                    background-color: #a0a0a0aa !important;
                 }
             }
         }
         &__btn-check{
+            background-color: #080c !important;
+            position: absolute;
+            top: -42px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            border-radius: 0 0 10px 10px !important;
+
             &:active{
-                color: #080;
+                background-color: #080a !important;
             }
         }
     }

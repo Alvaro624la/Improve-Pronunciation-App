@@ -8,6 +8,9 @@ function App() {
   const [generalLanguage, setGeneralLanguage] = useState('en-US');
   const [urlEndpoint, setUrlEndpoint] = useState('/en');
   const [btnNewTextContent, setBtnNewTextContent] = useState('Start');
+  /// CSS ///
+  const [visibilityListenBtn, setVisibilityListenBtn] = useState('hidden');
+  const [visibilityCheckBtn, setVisibilityCheckBtn] = useState('hidden');
   ///////////////////// API - TEXTOS ALEATORIOS /////////////////////
   const [data, setData] = useState();
   const [readingTitle, setReadingTitle] = useState("Welcome! Let me see if you can pronounce correctly the same text! Click 'start', 'rec' and start talking.");
@@ -36,6 +39,7 @@ function App() {
     dataIndex > data.length - 2 ? setDataIndex(0) : setDataIndex(dataIndex + 1);
     localStorage.setItem('dataIndex', dataIndex);
     setTranscript('');
+    setVisibilityCheckBtn('hidden');
   }
 
   ///////////////////// API - SpeechSynthesis /////////////////////
@@ -63,6 +67,7 @@ function App() {
     console.log('recording stopped');
   }
   recognitionVoice.onresult = (e)=>{
+    setVisibilityCheckBtn('visible');
     const arrTranscripts = [];
     for(let i = 0; i < e.results.length; i++){
       arrTranscripts.push(e.results[i][0].transcript);
@@ -104,10 +109,16 @@ function App() {
           <h3 className="app__textsAB-cont__textA-cont__title">{readingTitle}</h3>
           <textarea className="app__textsAB-cont__textA-cont__readingText" value={readingText} readOnly/>
           <div className="app__textsAB-cont__textA-cont__api-listen-btns-cont">
-            <HiSpeakerWave className="app__textsAB-cont__textA-cont__api-listen-btns-cont__btn" onClick={()=>synth.speak(utterThis)}/>
-            <BsFillPlayFill className="app__textsAB-cont__textA-cont__api-listen-btns-cont__btn" onClick={()=>synth.resume(utterThis)}/>
-            <BsFillPauseFill className="app__textsAB-cont__textA-cont__api-listen-btns-cont__btn" onClick={()=>synth.pause(utterThis)}/>
-            <BsStopFill className="app__textsAB-cont__textA-cont__api-listen-btns-cont__btn" onClick={()=>synth.cancel(utterThis)}/>
+            <HiSpeakerWave className="app__textsAB-cont__textA-cont__api-listen-btns-cont__btn" onClick={()=>{
+              synth.speak(utterThis);
+              setVisibilityListenBtn('visible');
+              }}/>
+            <BsFillPlayFill className="app__textsAB-cont__textA-cont__api-listen-btns-cont__btn" style={{visibility: visibilityListenBtn}} onClick={()=>synth.resume(utterThis)}/>
+            <BsFillPauseFill className="app__textsAB-cont__textA-cont__api-listen-btns-cont__btn" style={{visibility: visibilityListenBtn}} onClick={()=>synth.pause(utterThis)}/>
+            <BsStopFill className="app__textsAB-cont__textA-cont__api-listen-btns-cont__btn" style={{visibility: visibilityListenBtn}} onClick={()=>{
+              synth.cancel(utterThis);
+              setVisibilityListenBtn('hidden');
+              }}/>
           </div>
         </div>
         <div className="app__textsAB-cont__textB-cont">
@@ -115,12 +126,12 @@ function App() {
         </div>
       </div>
       <div className="app__btns-cont">
+        <button className="app__btns-cont__btn-check" onClick={check} style={{visibility: visibilityCheckBtn}}>Check<BsCheckAll/></button>
         <button className="app__btns-cont__btn-change" onClick={changeText}>{btnNewTextContent}</button>
         <div className="app__btns-cont__rec-stop">
           <button className="app__btns-cont__rec-stop__btn-rec" onClick={rec}>REC<BsFillRecordFill/></button>
           <button className="app__btns-cont__rec-stop__btn-stop" onClick={stopRec}>STOP<BsStopFill/></button>
         </div>
-        <button className="app__btns-cont__btn-check" onClick={check}>Check<BsCheckAll/></button>
       </div>
     </div>
     </>
