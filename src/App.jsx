@@ -1,35 +1,42 @@
 import { useState, useEffect } from 'react'
 import { BsFillRecordFill, BsStopFill, BsCheckAll, BsFillPlayFill, BsFillPauseFill } from "react-icons/bs";
-import { HiSpeakerWave } from "react-icons/hi2";
+import { HiSpeakerWave, HiLanguage } from "react-icons/hi2";
+import esESFlag from "./assets/es-ES-flag.png";
+import enUSFlag from "./assets/en-US-flag.png";
+import enUKFlag from "./assets/en-UK-flag.png";
 import './App.scss'
 
 function App() {
-  
-  const [generalLanguage, setGeneralLanguage] = useState('en-US');
-  const [urlEndpoint, setUrlEndpoint] = useState('/en');
+  /// LANG and Start game ///
   const [btnNewTextContent, setBtnNewTextContent] = useState('Start');
+  const [generalLang, setGeneralLang] = useState(localStorage.getItem('generalLang') || 'en-US'); // --- 'en-US' [4] --- 'es-ES' [0, 1, 2 o 7] --- 'en-UK' [5 o 6] --- 
+  const [generalVoice, setGeneralVoice] = useState(localStorage.getItem('generalVoice') || 4);
+  const [urlEndpoint, setUrlEndpoint] = useState(localStorage.getItem('urlEndpoint') || 'en');
+
   /// CSS ///
+  const [langSelectorCSS, setLangSelectorCSS] = useState('app__lang-selector lang-selector-hidden');
   const [visibilityListenBtn, setVisibilityListenBtn] = useState('hidden');
   const [visibilityCheckBtn, setVisibilityCheckBtn] = useState('hidden');
+  const [visibilityRecStopBtn, setVisibilityRecStopBtn] = useState('hidden');
   ///////////////////// API - TEXTOS ALEATORIOS /////////////////////
   const [data, setData] = useState();
   const [readingTitle, setReadingTitle] = useState("Welcome! Let me see if you can pronounce correctly the same text! Click 'start', 'rec' and start talking.");
   const [readingText, setReadingText] = useState();
   const [dataIndex, setDataIndex] = useState();
 
-  useEffect(()=>{
-    try{
-      const url = `https://my-json-server.typicode.com/Alvaro624la/API-Generador-textos-ES-EN/${urlEndpoint}`; // endpoints: '/es' & '/en'
-      const getData = async() => {
-        const response = await fetch(url);
-        const data = await response.json();
-        setData(data);
-        localStorage.getItem('dataIndex') === null ? setDataIndex(Math.round(Math.random()*10)) : setDataIndex(Number(localStorage.getItem('dataIndex')))
-      }
-      getData();
-    } catch {error => console.warn(`Error. Failed to fetch DailyPhoto. --> ${error}`)}
-  },[]);
-  // console.warn(data);
+    useEffect(()=>{
+      try{
+        const url = `https://my-json-server.typicode.com/Alvaro624la/API-Generador-textos-ES-EN/${urlEndpoint}`; // endpoints: 'es' & 'en'
+        const getData = async() => {
+          const response = await fetch(url);
+          const data = await response.json();
+          setData(data);
+          localStorage.getItem('dataIndex') === null ? setDataIndex(Math.round(Math.random()*10)) : setDataIndex(Number(localStorage.getItem('dataIndex')))
+        }
+        getData();
+      } catch {error => console.warn(`Error. Failed to fetch DailyPhoto. --> ${error}`)}
+    },[urlEndpoint]);
+    // console.warn(data);
 
   const changeText = () => {
     // console.log(dataIndex);
@@ -40,13 +47,15 @@ function App() {
     localStorage.setItem('dataIndex', dataIndex);
     setTranscript('');
     setVisibilityCheckBtn('hidden');
+    setVisibilityRecStopBtn('visible');
   }
 
   ///////////////////// API - SpeechSynthesis /////////////////////
   const synth = window.speechSynthesis;
   const utterThis = new SpeechSynthesisUtterance(readingText);
-  utterThis.lang = generalLanguage;
+  utterThis.lang = generalLang;
   const voices = speechSynthesis.getVoices();
+  utterThis.voice = voices[generalVoice];
   // console.log(voices);
 
   ///////////////////// HOOK - SpeechRecognition /////////////////////
@@ -54,13 +63,14 @@ function App() {
 
   const recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognitionVoice = new recognition()
-  recognitionVoice.lang = {generalLanguage};
+  recognitionVoice.lang = {generalLang};
   recognitionVoice.continuous = true;
 
   const rec = () => {
     setTranscript('');
     recognitionVoice.start();
     console.log('recording');
+    setVisibilityCheckBtn('hidden');
   };
   const stopRec = () => {
     recognitionVoice.stop();
@@ -76,34 +86,80 @@ function App() {
   };
 
   const check = () => {
+    setVisibilityRecStopBtn('hidden');
+    setVisibilityCheckBtn('hidden');
     let arrCoincidentes = [];
     let arrNoCoincidentes = [];
+
     const textA = readingText.toLowerCase().split(/\W/g).join('-').replace(/\-+/g, ' ').split(' ');
     const textB = transcript.toLowerCase().split(' ');
-    console.log(textA);
-    console.log(textB);
-    // v1
-    // for(let i = 0; i < textB.length; i++){
-      // textA[i] === textB[i] ? arrCoincidentes.push(textB[i]) : arrNoCoincidentes.push(textB[i]);
-    //v2
-      // textA.includes(`${textB[i]} `) ? arrCoincidentes.push(textA[i]) : arrNoCoincidentes.push(textB[i]);
-    // }
-    //v3
-    textB.map((e, i)=>{
-      textA.includes(e) ? arrCoincidentes.push(textA[i]) : arrNoCoincidentes.push(` ${textA[i]}`);
+    // console.log(textA);
+    // console.log(textB);
+    textA.map((e, i)=>{
+      if(i < textB.length){
+        textB.includes(e) ? arrCoincidentes.push(e) : arrNoCoincidentes.push(` ${e}`);
+      }
     });
-    console.warn(arrCoincidentes);
-    console.warn(arrNoCoincidentes);
+    // console.warn(arrCoincidentes);
+    // console.warn(arrNoCoincidentes);
     if(arrNoCoincidentes.length === 0){
-      setReadingText(`You mistaken all the words. 'Repeat' and try again.`);
-      setBtnNewTextContent('Repeat');
+      setReadingText(`Well done. You said this correctly: ${arrCoincidentes} `);
     } else setReadingText(`You mistaken this words:${arrNoCoincidentes}`);
   }
 
-
+  ///////////////////// CHANGE LANGUAGE /////////////////////
+  const changeLangES = () => {
+    setLangSelectorCSS('app__lang-selector lang-selector-hidden');
+    setReadingTitle(data[0].title);
+    setReadingText(data[0].text);
+    setGeneralLang('es-ES');
+    setGeneralVoice(0);
+    setUrlEndpoint('es');
+    localStorage.setItem('generalLang', generalLang);
+    localStorage.setItem('generalVoice', generalVoice);
+    localStorage.setItem('urlEndpoint', urlEndpoint);
+  }
+  const changeLangUS = () => {
+    setLangSelectorCSS('app__lang-selector lang-selector-hidden');
+    setReadingTitle(data[0].title);
+    setReadingText(data[0].text);
+    setGeneralLang('en-US');
+    setGeneralVoice(4);
+    setUrlEndpoint('en');
+    localStorage.setItem('generalLang', generalLang);
+    localStorage.setItem('generalVoice', generalVoice);
+    localStorage.setItem('urlEndpoint', urlEndpoint);
+  }
+  const changeLangUK = () => {
+    setLangSelectorCSS('app__lang-selector lang-selector-hidden');
+    setReadingTitle(data[0].title);
+    setReadingText(data[0].text);
+    setGeneralLang('en-UK');
+    setGeneralVoice(5);
+    setUrlEndpoint('en');
+    localStorage.setItem('generalLang', generalLang);
+    localStorage.setItem('generalVoice', generalVoice);
+    localStorage.setItem('urlEndpoint', urlEndpoint);
+  }
+  
   return (
     <>
     <div className="app">
+      <button onClick={()=>langSelectorCSS === 'app__lang-selector' ? setLangSelectorCSS('app__lang-selector lang-selector-hidden') : setLangSelectorCSS('app__lang-selector')} className='app__btn-change-lang'><HiLanguage/>Change language</button>
+      <ul className={langSelectorCSS}>
+        <li onClick={changeLangES}>
+          <img src={esESFlag}/>
+          <h4>Español (ES)</h4>
+        </li>
+        <li onClick={changeLangUS}>
+          <img src={enUSFlag}/>
+          <h4>English (US)</h4>
+        </li>
+        <li onClick={changeLangUK}>
+          <img src={enUKFlag}/>
+          <h4>English (UK)</h4>
+        </li>
+      </ul>      
       <div className="app__textsAB-cont">
         <div className="app__textsAB-cont__textA-cont">
           <h3 className="app__textsAB-cont__textA-cont__title">{readingTitle}</h3>
@@ -129,8 +185,8 @@ function App() {
         <button className="app__btns-cont__btn-check" onClick={check} style={{visibility: visibilityCheckBtn}}>Check<BsCheckAll/></button>
         <button className="app__btns-cont__btn-change" onClick={changeText}>{btnNewTextContent}</button>
         <div className="app__btns-cont__rec-stop">
-          <button className="app__btns-cont__rec-stop__btn-rec" onClick={rec}>REC<BsFillRecordFill/></button>
-          <button className="app__btns-cont__rec-stop__btn-stop" onClick={stopRec}>STOP<BsStopFill/></button>
+          <button className="app__btns-cont__rec-stop__btn-rec" onClick={rec} style={{visibility: visibilityRecStopBtn}}>REC<BsFillRecordFill/></button>
+          <button className="app__btns-cont__rec-stop__btn-stop" onClick={stopRec} style={{visibility: visibilityRecStopBtn}}>STOP<BsStopFill/></button>
         </div>
       </div>
     </div>
@@ -141,7 +197,6 @@ function App() {
 export default App
 
 ////// tareas: 
-// cambiar a español y britanico también
 // mostrar esas diferencias desde la coincidencia true hasta la siguiente true (rodeada por trues, sacará las palabras o frase mala)
 //posibilidad de editar tu texto hablado, antes de analizar? o mejor aún, al analizar las coincidentes, si hay dos coincidentes seguidas pero en medio hay una que no, por ejemplo "today morning" "today was morning", ese was se coló por un fallo sin querer que no tiene sentido. Pues la posibilidad de eliminarlo el "was" solamente y luego ya volver a porder analizar todo.
 
